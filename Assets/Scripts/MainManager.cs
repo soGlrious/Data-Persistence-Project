@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using System.IO;
 
 public class MainManager : MonoBehaviour
 {
@@ -11,6 +12,7 @@ public class MainManager : MonoBehaviour
     public Rigidbody Ball;
 
     public Text ScoreText;
+    public Text UserText;
     public GameObject GameOverText;
     
     private bool m_Started = false;
@@ -18,10 +20,18 @@ public class MainManager : MonoBehaviour
     
     private bool m_GameOver = false;
 
+    string username = DataPersistence.Instance.Username.text;
     
+
     // Start is called before the first frame update
     void Start()
     {
+        DataPersistence.Instance.LoadHighScore();
+        int currentHighScore = DataPersistence.Instance.currentHighScore;
+        string username = DataPersistence.Instance.userName;
+        UserText.text = "Best Score: " + username + " " + currentHighScore;
+
+
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
         
@@ -42,6 +52,7 @@ public class MainManager : MonoBehaviour
     {
         if (!m_Started)
         {
+
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 m_Started = true;
@@ -70,7 +81,32 @@ public class MainManager : MonoBehaviour
 
     public void GameOver()
     {
+        
+
+        if (m_Points > DataPersistence.Instance.currentHighScore)
+        {
+
+            UserText.text = "New High Score: " + username + " " + m_Points;
+            Debug.Log("Loop Entered");
+            DataPersistence.Instance.currentHighScore = m_Points;
+            DataPersistence.Instance.userName = username;
+            DataPersistence.Instance.SaveHighScore();
+        }
+
+        else
+        {
+            UserText.text = "Best Score: " + DataPersistence.Instance.userName + " " + DataPersistence.Instance.currentHighScore;
+        }
+
         m_GameOver = true;
         GameOverText.SetActive(true);
     }
+
+    public void BackToMenu()
+    {
+        SceneManager.LoadScene(0);
+    }
+
+
+
 }
